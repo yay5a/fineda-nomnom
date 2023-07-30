@@ -1,26 +1,23 @@
-import { ApolloClient, InMemoryCache, createHttpLink, ApolloLink, concat } from '@apollo/client';
-
-// Replace this with your GraphQL server endpoint
-const GRAPHQL_ENDPOINT = 'https://good-eats-b2abe2613d0c.herokuapp.com/graphql';
+import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
+import { setContext } from '@apollo/client/link/context';
 
 const httpLink = createHttpLink({
-  uri: GRAPHQL_ENDPOINT,
+  uri: 'http://localhost:5000/graphql',
 });
 
-const authMiddleware = new ApolloLink((operation, forward) => {
-  // Set the authorization header here if needed
-  // Example: 
-  // const token = localStorage.getItem('token');
-  // operation.setContext({
-  //   headers: {
-  //     authorization: token ? `Bearer ${token}` : '',
-  //   },
-  // });
-  return forward(operation);
+const authLink = setContext((_, { headers }) => {
+
+  
+  return {
+    headers: {
+      ...headers,
+      authorization: localStorage.getItem("token") || "",
+    }
+  }
 });
 
 const client = new ApolloClient({
-  link: concat(authMiddleware, httpLink),
+  link: authLink.concat(httpLink),
   cache: new InMemoryCache(),
 });
 
